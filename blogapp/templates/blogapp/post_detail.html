@@ -1,0 +1,53 @@
+{% extends "blogapp/base.html" %}
+{% block content %}
+    <article class="card">
+        <div class="card-body">
+            <h1 class="card-title">{{ object.title }}</h1>
+            <div class="text-muted mb-3">
+                <small>Posted by {{ object.author }} on {{ object.date_posted|date:"F d, Y" }}</small>
+            </div>
+            {% if object.image %}
+                <img src="{{ object.image.url }}" class="card-img-top post-image mb-3" alt="{{ object.title }}">
+            {% endif %}
+            <p class="card-text">{{ object.content }}</p>
+            {% if object.author == user %}
+                <div class="mt-3">
+                    <a class="btn btn-secondary btn-sm" href="{% url 'post-update' object.pk %}">Edit</a>
+                    <a class="btn btn-danger btn-sm" href="{% url 'post-delete' object.pk %}">Delete</a>
+                </div>
+            {% endif %}
+        </div>
+    </article>
+
+    <div class="card mt-4">
+        <div class="card-body">
+            <h4>Comments</h4>
+            {% if user.is_authenticated %}
+                <form method="POST" action="{% url 'add-comment' object.pk %}">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <textarea name="content" class="form-control" rows="3" placeholder="Add a comment..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary mt-2">Submit</button>
+                </form>
+            {% else %}
+                <p><a href="{% url 'login' %}">Login</a> to add a comment.</p>
+            {% endif %}
+
+            <div class="mt-4">
+                {% for comment in object.comments.all %}
+                    <div class="card mb-2">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <small class="text-muted">{{ comment.author }} - {{ comment.date_posted|date:"F d, Y" }}</small>
+                            </div>
+                            <p class="mb-0">{{ comment.content }}</p>
+                        </div>
+                    </div>
+                {% empty %}
+                    <p class="text-muted">No comments yet.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+{% endblock content %}
